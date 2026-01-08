@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invitación Economía - Producción & Comunicación</title>
+    
+    <!-- Fuentes Google Fonts: Inter (Sans) y Playfair Display (Serif para VIP) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&display=swap" rel="stylesheet">
+    
+    <!-- React y ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel para traducir JSX en el navegador -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Configuración de Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        economy: {
+                            blue: '#193152',
+                            green: '#A1C945',
+                            gold: '#D4AF37', // Color dorado añadido para VIP
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'], // Fuente especial para VIP
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    animation: {
+                        'spin-slow': 'spin 3s linear infinite',
+                        'float': 'float 4s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'loading': 'loading 2s infinite ease-in-out',
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        loading: {
+                            '0%': { width: '0' },
+                            '100%': { width: '100%' },
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f8fafc;
+        }
+        /* Ocultar scrollbar horizontal */
+        body { overflow-x: hidden; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- ICONOS SVG ---
+        const Play = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        );
+        const Aperture = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><line x1="14.31" y1="8" x2="20.05" y2="17.94"></line><line x1="9.69" y1="8" x2="21.17" y2="8"></line><line x1="7.38" y1="12" x2="13.12" y2="2.06"></line><line x1="9.69" y1="16" x2="3.95" y2="6.06"></line><line x1="14.31" y1="16" x2="2.83" y2="16"></line><line x1="16.62" y1="12" x2="10.88" y2="21.94"></line></svg>
+        );
+        const Video = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+        );
+        const Clapperboard = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="4" y="2" width="16" height="20" rx="2" ry="2" transform="rotate(180 12 12)"></rect><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="18" x2="7.76" y2="22"></line><line x1="16.24" y1="18" x2="19.07" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="2"></line><line x1="7" y1="12" x2="12" y2="7"></line><line x1="12" y1="12" x2="17" y2="7"></line><line x1="17" y1="12" x2="22" y2="7"></line></svg>
+        );
+        const Mic = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+        );
+        const CheckCircle = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        );
+        const Send = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        );
+        const Mail = ({ className }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+        );
+
+        // --- COMPONENTES AUXILIARES ---
+        
+        const RevealOnScroll = ({ children, delay = 0 }) => {
+            const ref = useRef(null);
+            const [isVisible, setIsVisible] = useState(false);
+
+            useEffect(() => {
+                const observer = new IntersectionObserver(
+                    ([entry]) => {
+                        if (entry.isIntersecting) {
+                            setIsVisible(true);
+                        }
+                    },
+                    { threshold: 0.1 }
+                );
+                if (ref.current) observer.observe(ref.current);
+                return () => observer.disconnect();
+            }, []);
+
+            return (
+                <div 
+                    ref={ref}
+                    style={{ transitionDelay: `${delay}ms` }}
+                    className={`transition-all duration-1000 transform ${
+                        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                    }`}
+                >
+                    {children}
+                </div>
+            );
+        };
+
+        const WhatsAppButton = ({ name }) => {
+            const phoneNumber = "59175411570";
+            const message = `Hola, soy ${name}.
+Estoy lista para unirme al equipo de Comunicación de la carrera de Economía 01/2026`;
+            const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+
+            return (
+                <a 
+                    href={whatsappUrl}
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-4 bg-economy-green text-economy-blue w-full md:w-auto px-8 py-5 rounded-lg font-bold text-lg uppercase tracking-wider shadow-[0_0_20px_rgba(161,201,69,0.4)] hover:shadow-[0_0_30px_rgba(161,201,69,0.6)] transition-all duration-300 group"
+                >
+                    <Send className="w-5 h-5 group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
+                    <span>Unirme al Equipo</span>
+                </a>
+            );
+        };
+
+        // --- APP PRINCIPAL ---
+
+        const InvitationApp = () => {
+            const [isStarted, setIsStarted] = useState(false);
+            const [guestName, setGuestName] = useState("Carla"); // Nombre por defecto actualizado
+            const [isPlaying, setIsPlaying] = useState(false);
+
+            useEffect(() => {
+                const params = new URLSearchParams(window.location.search);
+                const nameParam = params.get('nombre');
+                if (nameParam) setGuestName(nameParam);
+            }, []);
+
+            const handleStart = () => {
+                setIsPlaying(true);
+                setTimeout(() => {
+                    setIsStarted(true);
+                    window.scrollTo(0, 0);
+                }, 800);
+            };
+
+            return (
+                <div className="min-h-screen font-sans text-economy-blue overflow-x-hidden selection:bg-economy-green selection:text-white bg-slate-50">
+                
+                {/* --- INTRO: PANTALLA DE "STANDBY" --- */}
+                <div 
+                    className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-economy-blue text-white transition-all duration-1000 ${
+                    isStarted ? '-translate-y-full opacity-0 pointer-events-none' : 'translate-y-0 opacity-100'
+                    }`}
+                >
+                    {/* Elementos de interfaz de cámara */}
+                    <div className="absolute top-8 left-8 flex items-center gap-2">
+                        <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                        <span className="font-mono text-xs tracking-widest opacity-70">REC</span>
+                    </div>
+                    <div className="absolute top-8 right-8 font-mono text-xs tracking-widest opacity-70">
+                        ISO 800
+                    </div>
+                    <div className="absolute bottom-8 left-8 font-mono text-xs tracking-widest opacity-70">
+                        4K 60FPS
+                    </div>
+
+                    {/* Marco de enfoque */}
+                    <div className="absolute inset-12 border border-white/10 pointer-events-none hidden md:block">
+                        <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-white/50"></div>
+                        <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-white/50"></div>
+                        <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-white/50"></div>
+                        <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-white/50"></div>
+                    </div>
+
+                    {/* Contenido Central */}
+                    <div className="text-center relative z-10 p-6">
+                        <div className="mb-6 flex justify-center">
+                            <div className={`p-6 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm transition-all duration-700 ${isPlaying ? 'scale-150 opacity-0' : 'scale-100 opacity-100'}`}>
+                            <Aperture className={`w-12 h-12 text-economy-green ${isPlaying ? 'animate-spin' : ''}`} />
+                            </div>
+                        </div>
+                        
+                        <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-2">
+                            ECONOMÍA
+                        </h1>
+                        <p className="text-economy-green font-mono tracking-[0.3em] text-sm md:text-base mb-12 uppercase">
+                            Dirección de carrera
+                        </p>
+
+                        <button
+                            onClick={handleStart}
+                            className="group relative px-10 py-4 bg-economy-green text-economy-blue font-bold tracking-widest uppercase text-sm hover:bg-white transition-all duration-300 overflow-hidden rounded-sm"
+                        >
+                            <span className="relative z-10 flex items-center gap-3">
+                                <Mail className="w-4 h-4" /> Abrir Invitación
+                            </span>
+                            <div className="absolute inset-0 bg-white transform translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                        </button>
+                    </div>
+                </div>
+
+                {/* --- CONTENIDO PRINCIPAL --- */}
+                <div className={`transition-opacity duration-1000 ${isStarted ? 'opacity-100' : 'opacity-0'}`}>
+                    
+                    {/* SECCIÓN 1: HERO / SALUDO (Azul Oscuro) */}
+                    <section className="relative bg-economy-blue text-white pt-20 pb-32 md:pb-48 px-6 md:px-12 overflow-hidden">
+                        {/* Fondo abstracto */}
+                        <div className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-b from-economy-green/10 to-transparent transform skew-x-12"></div>
+                        
+                        <div className="max-w-5xl mx-auto relative z-10 text-center md:text-left">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20 mb-6 animate-fade-in-up">
+                                <div className="w-2 h-2 bg-economy-green rounded-full"></div>
+                                <span className="text-xs font-mono uppercase tracking-wider text-white/80">Invitación especial</span>
+                            </div>
+                            
+                            <h2 className="text-5xl md:text-7xl font-black mb-6 leading-tight animate-fade-in-up delay-100">
+                                HOLA <br/>
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-economy-green to-emerald-300">
+                                    {guestName}
+                                </span>
+                            </h2>
+                            
+                            <p className="text-xl md:text-2xl font-light text-gray-300 max-w-2xl animate-fade-in-up delay-200">
+                                Se viene una nueva temporada. <br/>
+                                <span className="text-white font-medium">Luces, cámara y acción.</span>
+                            </p>
+                        </div>
+                    </section>
+
+                    {/* DIVISOR DE ONDA 1 */}
+                    <div className="relative -mt-24 z-20">
+                        <svg className="w-full h-24 md:h-48" viewBox="0 0 1440 320" preserveAspectRatio="none">
+                            <path fill="#ffffff" fillOpacity="1" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,224C672,245,768,267,864,261.3C960,256,1056,224,1152,197.3C1248,171,1344,149,1392,138.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                        </svg>
+                    </div>
+
+                    {/* SECCIÓN 2: RECONOCIMIENTO (ADAPTADA PARA NUEVOS TALENTOS) */}
+                    <section className="bg-white py-20 px-6 md:px-12 relative">
+                        <div className="max-w-4xl mx-auto">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                            
+                                {/* Gráfico Visual */}
+                                <div className="relative order-2 md:order-1">
+                                    <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden shadow-2xl relative group transform rotate-[-2deg] hover:rotate-0 transition-transform duration-500">
+                                        <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
+                                            <Video className="w-16 h-16 text-gray-400 opacity-50" />
+                                        </div>
+                                        <div className="absolute bottom-4 left-4 right-4 h-2 bg-economy-green rounded-full overflow-hidden">
+                                            <div className="h-full bg-black w-2/3 animate-loading"></div>
+                                        </div>
+                                        <div className="absolute top-4 left-4 px-2 py-1 bg-black/80 text-white text-[10px] font-mono rounded">
+                                            PROYECTO_FINAL.PRPROJ
+                                        </div>
+                                    </div>
+                                    <div className="absolute -top-6 -right-6 p-4 bg-economy-blue rounded-lg shadow-lg animate-float">
+                                        <Clapperboard className="w-8 h-8 text-economy-green" />
+                                    </div>
+                                </div>
+
+                                {/* Texto */}
+                                <div className="order-1 md:order-2 space-y-6">
+                                    <RevealOnScroll>
+                                        <h3 className="text-3xl font-bold text-economy-blue">
+                                            Tienes todo lo que buscamos
+                                        </h3>
+                                    </RevealOnScroll>
+                                    <RevealOnScroll delay={200}>
+                                        <p className="text-lg text-gray-600 leading-relaxed">
+                                            Hemos notado tu talento y carisma. Creemos que tienes mucho para ofrecer y nos encantaría que esa energía sea parte de nuestra nueva imagen.
+                                        </p>
+                                    </RevealOnScroll>
+                                    <RevealOnScroll delay={400}>
+                                        <div className="p-4 bg-gray-50 border-l-4 border-economy-green">
+                                            <p className="text-economy-blue font-medium italic">
+                                                "Queremos verte brillar"
+                                            </p>
+                                        </div>
+                                    </RevealOnScroll>
+                                </div>
+
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* DIVISOR DE ONDA 2 */}
+                    <div className="relative z-20">
+                        <svg className="w-full h-24 md:h-32" viewBox="0 0 1440 320" preserveAspectRatio="none">
+                            <path fill="#f1f5f9" fillOpacity="1" d="M0,96L48,128C96,160,192,224,288,240C384,256,480,224,576,192C672,160,768,128,864,138.7C960,149,1056,203,1152,213.3C1248,224,1344,192,1392,176L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                        </svg>
+                    </div>
+
+                    {/* SECCIÓN 3: LA PROPUESTA */}
+                    <section className="bg-slate-100 py-20 px-6 md:px-12">
+                        <div className="max-w-3xl mx-auto text-center">
+                            
+                            <RevealOnScroll>
+                                <div className="inline-flex items-center justify-center p-3 mb-8 bg-white rounded-full shadow-lg">
+                                    <Mic className="w-6 h-6 text-economy-blue" />
+                                </div>
+                            </RevealOnScroll>
+
+                            <RevealOnScroll delay={200}>
+                                <h3 className="text-3xl md:text-5xl font-black text-economy-blue mb-6">
+                                    QUEREMOS EMPEZAR EL 2026 <br/>
+                                    <span className="text-economy-green inline-block transform hover:scale-110 transition-transform duration-300 cursor-default">
+                                    CONTIGO
+                                    </span>
+                                </h3>
+                            </RevealOnScroll>
+
+                            <RevealOnScroll delay={400}>
+                                <p className="text-lg text-gray-600 mb-12 max-w-xl mx-auto">
+                                    Buscamos siempre seguir mejorando la imagen de la carrera, y para ello necesitamos <span className="border-b-2 border-economy-green/60">a los mejores frente y detrás de cámaras.</span>
+                                </p>
+                            </RevealOnScroll>
+
+                            {/* Ticket de Invitación VIP (Actualizado con mejor tipografía) */}
+                            <RevealOnScroll delay={600}>
+                                <div className="bg-white p-1 rounded-2xl shadow-xl transform rotate-1 hover:rotate-0 transition-transform duration-500">
+                                    <div className="bg-gradient-to-br from-white to-stone-50 border-2 border-dashed border-economy-gold rounded-xl p-6 md:p-14 relative overflow-hidden">
+                                        
+                                        {/* Etiqueta VIP Dorada */}
+                                        <div className="absolute top-0 right-0 bg-economy-gold text-white text-xs font-bold px-4 py-1.5 rounded-bl-xl shadow-sm tracking-widest z-10">
+                                            VIP ACCESS
+                                        </div>
+                                        
+                                        {/* Agregado mt-6 para móviles para evitar solapamiento con la etiqueta VIP */}
+                                        <p className="text-xs md:text-sm font-mono tracking-[0.3em] text-gray-400 uppercase mb-4 mt-6 md:mt-0">Invitación Oficial</p>
+                                        
+                                        <h4 className="text-3xl md:text-5xl font-serif font-black text-economy-blue mb-3 uppercase tracking-wide leading-tight">
+                                            Equipo de <br /> Comunicación
+                                        </h4>
+                                        
+                                        <div className="w-12 h-1 bg-economy-gold mx-auto my-4 rounded-full"></div>
+
+                                        <p className="text-lg md:text-2xl text-economy-green font-medium tracking-widest uppercase">
+                                            Programa de Pasantías 01/2026
+                                        </p>
+                                        
+                                        <div className="mt-8 flex flex-col md:flex-row justify-center items-center gap-4 text-sm text-gray-500">
+                                            <span className="flex items-center gap-1"><CheckCircle className="w-4 h-4 text-economy-green"/> Imagen Institucional</span>
+                                            <span className="flex items-center gap-1"><CheckCircle className="w-4 h-4 text-economy-green"/> Edición de Video</span>
+                                            <span className="flex items-center gap-1"><CheckCircle className="w-4 h-4 text-economy-green"/> Creación de Contenido</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </RevealOnScroll>
+
+                        </div>
+                    </section>
+
+                    {/* DIVISOR DE ONDA 3 */}
+                    <div className="relative -mb-1 z-20">
+                        <svg className="w-full h-24 md:h-48" viewBox="0 0 1440 320" preserveAspectRatio="none">
+                            <path fill="#193152" fillOpacity="1" d="M0,192L48,202.7C96,213,192,235,288,229.3C384,224,480,192,576,165.3C672,139,768,117,864,128C960,139,1056,181,1152,197.3C1248,213,1344,203,1392,197.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+                        </svg>
+                    </div>
+
+                    {/* SECCIÓN 4: CTA FINAL */}
+                    <section className="bg-economy-blue text-white pt-10 pb-24 px-6 md:px-12 text-center">
+                        <div className="max-w-2xl mx-auto space-y-8">
+                            <h3 className="text-2xl font-bold font-mono uppercase tracking-widest text-economy-green mb-4">
+                                ¿Lista para una nueva experiencia?
+                            </h3>
+                            
+                            <p className="text-gray-300 mb-8">
+                                Creemos en ti y en tu talento, queremos seguir creciendo, aprendiendo y mejorando <span className="text-white font-bold border-b border-economy-green">contigo en el equipo.</span>
+                                <br/><br/>
+                                Solo necesitas confirmar tu participación. <br/>
+                                Tienes hasta el <span className="text-white font-bold border-b border-economy-green">23 de Enero, 2026</span>.
+                            </p>
+
+                            <div className="transform hover:scale-105 transition-transform duration-300">
+                                <WhatsAppButton name={guestName} />
+                            </div>
+
+                            <p className="text-xs text-gray-500 mt-12 pt-12 border-t border-gray-800">
+                                Dirección de Carrera de Economía UAGRM - Comunicación 2026
+                            </p>
+                        </div>
+                    </section>
+
+                </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<InvitationApp />);
+    </script>
+</body>
+</html>
