@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Descargador de Videos</string>
+    <string name="url_hint">Escribe una dirección o búsqueda</string>
+    <string name="go">Ir</string>
+    <string name="back">Atrás</string>
+    <string name="videos_found">Videos (%1$d)</string>
+    <string name="no_videos">Todavía no se detectaron videos. Reproduce el video en la página y vuelve a intentar.</string>
+    <string name="notif_channel">Descargas</string>
+</resources>
